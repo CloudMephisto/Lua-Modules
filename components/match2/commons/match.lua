@@ -257,7 +257,19 @@ function Match.templateFromMatchID(frame)
 end
 
 function Match.prepareRecords(records)
-	local match = records.matchRecord
+	Match.prepareMatchRecord(records.matchRecord)
+	for opponentIndex, opponentRecord in ipairs(records.opponentRecords) do
+		Match.restrictInPlace(opponentRecord, Match.opponentFields)
+		for _, playerRecord in ipairs(records.playerRecords[opponentIndex]) do
+			Match.restrictInPlace(playerRecord, Match.playerFields)
+		end
+	end
+	for _, gameRecord in ipairs(records.gameRecords) do
+		Match.restrictInPlace(gameRecord, Match.gameFields)
+	end
+end
+
+function Match.prepareMatchRecord(match)
 	match.dateexact = Logic.readBool(match.dateexact) and 1 or 0
 	match.finished = Logic.readBool(match.finished) and 1 or 0
 	match.match2bracketdata = match.match2bracketdata or match.bracketdata
@@ -294,6 +306,42 @@ Match.matchFields = Table.map({
 	'stream',
 	'tickername',
 	'tournament',
+	'type',
+	'vod',
+	'walkover',
+	'winner',
+}, function(_, field) return field, true end)
+
+Match.opponentFields = Table.map({
+	'extradata',
+	'icon',
+	'name',
+	'placement',
+	'score',
+	'status',
+	'template',
+	'type',
+}, function(_, field) return field, true end)
+
+Match.playerFields = Table.map({
+	'displayname',
+	'extradata',
+	'flag',
+	'name',
+}, function(_, field) return field, true end)
+
+Match.gameFields = Table.map({
+	'date',
+	'extradata',
+	'game',
+	'length',
+	'map',
+	'mode',
+	'participants',
+	'resulttype',
+	'rounds',
+	'scores',
+	'subgroup',
 	'type',
 	'vod',
 	'walkover',
